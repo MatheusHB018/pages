@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Análise Combinatória</title>
+    <style>
+        :root {
+            --primary-color: #4a6fa5;
+            --secondary-color: #6b8cbc;
+            --accent-color: #ff6b6b;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+            --success-color: #28a745;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: var(--dark-color);
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+        
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+        
+        h2 {
+            color: var(--secondary-color);
+            margin-bottom: 20px;
+        }
+        
+        h3 {
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+        
+        .btn-container {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        button:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+        
+        button.secondary {
+            background-color: var(--light-color);
+            color: var(--dark-color);
+            border: 1px solid #dee2e6;
+        }
+        
+        button.secondary:hover {
+            background-color: #e9ecef;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .wizard-option {
+            margin-bottom: 10px;
+            width: 100%;
+            text-align: left;
+        }
+        
+        .method-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .method-btn {
+            height: 80px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: var(--border-radius);
+            font-size: 16px;
+        }
+        
+        .result-section {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #dee2e6;
+        }
+        
+        .formula {
+            font-family: 'Courier New', monospace;
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: var(--border-radius);
+            margin: 10px 0;
+        }
+        
+        .calculation {
+            font-family: 'Courier New', monospace;
+            background-color: #f1f3f4;
+            padding: 10px;
+            border-radius: var(--border-radius);
+            margin: 10px 0;
+            white-space: pre-wrap;
+        }
+        
+        .final-result {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--success-color);
+            margin-top: 15px;
+            text-align: center;
+        }
+        
+        .back-btn {
+            margin-top: 20px;
+            background-color: #6c757d;
+        }
+        
+        .back-btn:hover {
+            background-color: #5a6268;
+        }
+        
+        @media (max-width: 768px) {
+            .method-buttons {
+                grid-template-columns: 1fr;
+            }
+            
+            .btn-container {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Calculadora de Análise Combinatória</h1>
+            <h2>Descubra o método e calcule o número de possibilidades</h2>
+        </header>
+        
+        <section id="modo-selecao" class="card">
+            <h3>Selecione o modo de uso:</h3>
+            <div class="btn-container">
+                <button id="btn-guiado">Modo Guiado (Não sei qual método usar)</button>
+                <button id="btn-direto">Modo Direto (Já sei qual método usar)</button>
+            </div>
+        </section>
+        
+        <section id="modo-guiado" class="card hidden">
+            <h3>Modo Guiado</h3>
+            <div id="wizard-pergunta" class="form-group"></div>
+            <div id="wizard-opcoes" class="btn-container"></div>
+            <button id="back-to-mode" class="back-btn">Voltar à seleção de modo</button>
+        </section>
+        
+        <section id="modo-direto" class="card hidden">
+            <h3>Modo Direto</h3>
+            <p>Selecione o método de análise combinatória que deseja calcular:</p>
+            <div class="method-buttons">
+                <button class="method-btn" data-method="adicao">Princípio da Adição</button>
+                <button class="method-btn" data-method="multiplicacao">Princípio da Multiplicação</button>
+                <button class="method-btn" data-method="permutacao-simples">Permutação Simples (Pₙ)</button>
+                <button class="method-btn" data-method="arranjo-simples">Arranjo Simples (A(n,k))</button>
+                <button class="method-btn" data-method="combinacao-simples">Combinação Simples (C(n,k))</button>
+                <button class="method-btn" data-method="permutacao-repeticao">Permutação com Repetição</button>
+                <button class="method-btn" data-method="combinacao-repeticao">Combinação com Repetição</button>
+                <button class="method-btn" data-method="permutacao-circular">Permutação Circular</button>
+            </div>
+            <button id="back-to-mode-2" class="back-btn">Voltar à seleção de modo</button>
+        </section>
+        
+        <section id="calculo-area" class="card hidden">
+            <h3 id="metodo-titulo"></h3>
+            <p id="metodo-descricao"></p>
+            <form id="calculo-form">
+                <div id="inputs-container"></div>
+                <button type="submit">Calcular</button>
+            </form>
+            <button id="back-to-method" class="back-btn">Voltar à seleção de método</button>
+        </section>
+        
+        <section id="resultado-area" class="card hidden">
+            <h3>Resultado</h3>
+            <div class="result-section">
+                <strong>Método Utilizado:</strong> <span id="resultado-metodo"></span>
+            </div>
+            <div class="result-section">
+                <strong>Explicação:</strong> <span id="resultado-explicacao"></span>
+            </div>
+            <div class="result-section">
+                <strong>Fórmula Aplicada:</strong>
+                <div id="resultado-formula" class="formula"></div>
+            </div>
+            <div class="result-section">
+                <strong>Cálculo:</strong>
+                <div id="resultado-calculo" class="calculation"></div>
+            </div>
+            <div class="result-section">
+                <div id="resultado-final" class="final-result"></div>
+            </div>
+            <button id="back-to-calc" class="back-btn">Voltar ao cálculo</button>
+            <button id="new-calculation" class="back-btn">Nova Análise</button>
+        </section>
+    </div>
+
+    <script>
+        // Funções de cálculo
+        function fatorial(n) {
+            if (n < 0) return NaN;
+            if (n === 0 || n === 1) return 1;
+            let resultado = 1;
+            for (let i = 2; i <= n; i++) {
+                resultado *= i;
+            }
+            return resultado;
+        }
+
+        function principioAdicao(...valores) {
+            return valores.reduce((acc, val) => acc + val, 0);
+        }
+
+        function principioMultiplicacao(...valores) {
+            return valores.reduce((acc, val) => acc * val, 1);
+        }
+
+        function permutacaoSimples(n) {
+            return fatorial(n);
+        }
+
+        function arranjoSimples(n, k) {
+            if (k > n) return 0;
+            return fatorial(n) / fatorial(n - k);
+        }
+
+        function combinacaoSimples(n, k) {
+            if (k > n) return 0;
+            return fatorial(n) / (fatorial(k) * fatorial(n - k));
+        }
+
+        function permutacaoComRepeticao(n, ...repeticoes) {
+            let denominador = 1;
+            for (const rep of repeticoes) {
+                denominador *= fatorial(rep);
+            }
+            return fatorial(n) / denominador;
+        }
+
+        function combinacaoComRepeticao(n, k) {
+            return combinacaoSimples(n + k - 1, k);
+        }
+
+        function permutacaoCircular(n) {
+            return fatorial(n - 1);
+        }
+
+        // Estrutura de dados para os métodos
+        const metodos = {
+            'adicao': {
+                nome: 'Princípio da Adição',
+                descricao: 'Usado quando temos eventos mutuamente exclusivos (OU). O número total de possibilidades é a soma das possibilidades de cada evento.',
+                formula: 'm + n + ...',
+                explicacao: 'A ordem não importa e os eventos são mutuamente exclusivos.',
+                inputs: [
+                    { id: 'valores', label: 'Valores (separados por vírgula)', type: 'text', placeholder: 'Ex: 5, 3, 2' }
+                ],
+                calcular: (dados) => {
+                    const valores = dados.valores.split(',').map(v => parseInt(v.trim()));
+                    return principioAdicao(...valores);
+                },
+                gerarCalculo: (dados, resultado) => {
+                    const valores = dados.valores.split(',').map(v => parseInt(v.trim()));
+                    return valores.join(' + ') + ' = ' + resultado;
+                }
+            },
+            'multiplicacao': {
+                nome: 'Princípio da Multiplicação',
+                descricao: 'Usado quando temos eventos que ocorrem em sequência (E). O número total de possibilidades é o produto das possibilidades de cada evento.',
+                formula: 'n₁ × n₂ × ...',
+                explicacao: 'A ordem importa e os eventos ocorrem em sequência.',
+                inputs: [
+                    { id: 'valores', label: 'Valores (separados por vírgula)', type: 'text', placeholder: 'Ex: 5, 3, 2' }
+                ],
+                calcular: (dados) => {
+                    const valores = dados.valores.split(',').map(v => parseInt(v.trim()));
+                    return principioMultiplicacao(...valores);
+                },
+                gerarCalculo: (dados, resultado) => {
+                    const valores = dados.valores.split(',').map(v => parseInt(v.trim()));
+                    return valores.join(' × ') + ' = ' + resultado;
+                }
+            },
+            'permutacao-simples': {
+                nome: 'Permutação Simples',
+                descricao: 'Usado quando queremos organizar todos os elementos de um conjunto, onde a ordem importa e não há elementos repetidos.',
+                formula: 'P(n) = n!',
+                explicacao: 'A ordem importa e usamos todos os elementos do conjunto.',
+                inputs: [
+                    { id: 'n', label: 'n (número total de elementos)', type: 'number', min: 0 }
+                ],
+                calcular: (dados) => {
+                    return permutacaoSimples(parseInt(dados.n));
+                },
+                gerarCalculo: (dados, resultado) => {
+                    const n = parseInt(dados.n);
+                    return `P(${n}) = ${n}! = ${resultado}`;
+                }
+            },
+            'arranjo-simples': {
+                nome: 'Arranjo Simples',
+                descricao: 'Usado quando queremos organizar uma parte dos elementos de um conjunto, onde a ordem importa e não há elementos repetidos.',
+                formula: 'A(n, k) = n! / (n - k)!',
+                explicacao: 'A ordem importa e usamos apenas uma parte dos elementos do conjunto.',
+                inputs: [
+                    { id: 'n', label: 'n (número total de elementos)', type: 'number', min: 0 },
+                    { id: 'k', label: 'k (número de elementos selecionados)', type: 'number', min: 0 }
+                ],
+                calcular: (dados) => {
+                    return arranjoSimples(parseInt(dados.n), parseInt(dados.k));
+                },
+                gerarCalculo: (dados, resultado) => {
+                    const n = parseInt(dados.n);
+                    const k = parseInt(dados.k);
+                    return `A(${n}, ${k}) = ${n}! / (${n} - ${k})! = ${fatorial(n)} / ${fatorial(n - k)} = ${resultado}`;
+                }
+            },
+            'combinacao-simples': {
+                nome: 'Combinação Simples',
+                descricao: 'Usado quando queremos selecionar uma parte dos elementos de um conjunto, onde a ordem não importa e não há elementos repetidos.',
+                formula: 'C(n, k) = n! / (k! × (n - k)!)',
+                explicacao: 'A ordem não importa e não há repetição de elementos.',
+                inputs: [
+                    { id: 'n', label: 'n (número total de elementos)', type: 'number', min: 0 },
+                    { id: 'k', label: 'k (número de elementos selecionados)', type: 'number', min: 0 }
+                ],
+                calcular: (dados) => {
+                    return combinacaoSimples(parseInt(dados.n), parseInt(dados.k));
+                },
+                gerarCalculo: (dados, resultado) => {
+                    const n = parseInt(dados.n);
+                    const k = parseInt(dados.k);
+                    return `C(${n}, ${k}) = ${n}! / (${k}! × (${n} - ${k})!) = ${fatorial(n)} / (${fatorial(k)} × ${fatorial(n - k)}) = ${resultado}`;
+                }
+            },
+            'permutacao-repeticao': {
+                nome: 'Permutação com Repetição',
+                descricao: 'Usado quando queremos organizar todos os elementos de um conjunto, onde a ordem importa e há elementos repetidos.',
+                formula: 'P(n; n₁, n₂, ...) = n! / (n₁! × n₂! × ...)',
+                explicacao: 'A ordem importa, usamos todos os elementos do conjunto e há elementos repetidos.',
+                inputs: [
+                    { id: 'n', label: 'n (número total de elementos)', type: 'number', min: 0 },
+                    { id: 'repeticoes', label: 'Repetições (separadas por vírgula)', type: 'text', placeholder: 'Ex: 2, 3, 1' }
+                ],
+                calcular: (dados) => {
+                    const repeticoes = dados.repeticoes.split(',').map(v => parseInt(v.trim()));
+                    return permutacaoComRepeticao(parseInt(dados.n), ...repeticoes);
+                },
+                gerarCalculo: (dados, resultado) => {
+                    const n = parseInt(dados.n);
+                    const repeticoes = dados.repeticoes.split(',').map(v => parseInt(v.trim()));
+                    let denominador = repeticoes.map(r => `${r}!`).join(' × ');
+                    return `P(${n}; ${repeticoes.join(', ')}) = ${n}! / (${denominador}) = ${fatorial(n)} / ${repeticoes.reduce((acc, val) => acc * fatorial(val), 1)} = ${resultado}`;
+                }
+            },
+            'combinacao-repeticao': {
+                nome: 'Combinação com Repetição',
+                descricao: 'Usado quando queremos selecionar uma parte dos elementos de um conjunto, onde a ordem não importa e os elementos podem ser repetidos.',
+                formula: 'CR(n, k) = C(n + k - 1, k) = (n + k - 1)! / (k! × (n - 1)!)',
+                explicacao: 'A ordem não importa e os elementos podem ser repetidos.',
+                inputs: [
+                    { id: 'n', label: 'n (número total de elementos)', type: 'number', min: 0 },
+                    { id: 'k', label: 'k (número de elementos selecionados)', type: 'number', min: 0 }
+                ],
+                calcular: (dados) => {
+                    return combinacaoComRepeticao(parseInt(dados.n), parseInt(dados.k));
+                },
+                gerarCalculo: (dados, resultado) => {
+                    const n = parseInt(dados.n);
+                    const k = parseInt(dados.k);
+                    return `CR(${n}, ${k}) = C(${n} + ${k} - 1, ${k}) = (${n + k - 1})! / (${k}! × (${n - 1})!) = ${fatorial(n + k - 1)} / (${fatorial(k)} × ${fatorial(n - 1)}) = ${resultado}`;
+                }
+            },
+            'permutacao-circular': {
+                nome: 'Permutação Circular',
+                descricao: 'Usado quando queremos organizar elementos em um círculo, onde rotações são consideradas iguais.',
+                formula: 'PC(n) = (n - 1)!',
+                explicacao: 'A ordem importa, usamos todos os elementos e estão dispostos em um círculo.',
+                inputs: [
+                    { id: 'n', label: 'n (número total de elementos)', type: 'number', min: 0 }
+                ],
+                calcular: (dados) => {
+                    return permutacaoCircular(parseInt(dados.n));
+                },
+                gerarCalculo: (dados, resultado) => {
+                    const n = parseInt(dados.n);
+                    return `PC(${n}) = (${n} - 1)! = ${fatorial(n - 1)} = ${resultado}`;
+                }
+            }
+        };
+
+        // Lógica do Wizard
+        const wizardTree = {
+            pergunta: "Seu problema envolve eventos que ocorrem em sequência (E) ou eventos que são mutuamente exclusivos (OU)?",
+            opcoes: [
+                { texto: "Sequência/E", proximo: "multiplicacao" },
+                { texto: "Exclusivos/OU", proximo: "adicao" },
+                { texto: "Nenhum, estou (re)organizando um grupo", proximo: "p2" }
+            ]
+        };
+
+        const wizardP2 = {
+            pergunta: "A ordem dos elementos importa?",
+            opcoes: [
+                { texto: "NÃO importa", proximo: "p3" },
+                { texto: "SIM, importa", proximo: "p4" }
+            ]
+        };
+
+        const wizardP3 = {
+            pergunta: "Os elementos do conjunto podem ser repetidos?",
+            opcoes: [
+                { texto: "NÃO podem", proximo: "combinacao-simples" },
+                { texto: "SIM, podem", proximo: "combinacao-repeticao" }
+            ]
+        };
+
+        const wizardP4 = {
+            pergunta: "Você está usando TODOS os elementos do conjunto original?",
+            opcoes: [
+                { texto: "SIM, todos", proximo: "p5" },
+                { texto: "NÃO, apenas uma parte", proximo: "arranjo-simples" }
+            ]
+        };
+
+        const wizardP5 = {
+            pergunta: "Existem elementos repetidos no conjunto?",
+            opcoes: [
+                { texto: "SIM, há repetições", proximo: "permutacao-repeticao" },
+                { texto: "NÃO, todos são distintos", proximo: "p6" }
+            ]
+        };
+
+        const wizardP6 = {
+            pergunta: "Os elementos estão dispostos em um círculo (onde rotações são consideradas iguais)?",
+            opcoes: [
+                { texto: "SIM, em círculo", proximo: "permutacao-circular" },
+                { texto: "NÃO, em linha/fila", proximo: "permutacao-simples" }
+            ]
+        };
+
+        // Elementos DOM
+        const modoSelecao = document.getElementById('modo-selecao');
+        const modoGuiado = document.getElementById('modo-guiado');
+        const modoDireto = document.getElementById('modo-direto');
+        const calculoArea = document.getElementById('calculo-area');
+        const resultadoArea = document.getElementById('resultado-area');
+        
+        const wizardPergunta = document.getElementById('wizard-pergunta');
+        const wizardOpcoes = document.getElementById('wizard-opcoes');
+        
+        const metodoTitulo = document.getElementById('metodo-titulo');
+        const metodoDescricao = document.getElementById('metodo-descricao');
+        const inputsContainer = document.getElementById('inputs-container');
+        const calculoForm = document.getElementById('calculo-form');
+        
+        const resultadoMetodo = document.getElementById('resultado-metodo');
+        const resultadoExplicacao = document.getElementById('resultado-explicacao');
+        const resultadoFormula = document.getElementById('resultado-formula');
+        const resultadoCalculo = document.getElementById('resultado-calculo');
+        const resultadoFinal = document.getElementById('resultado-final');
+
+        // Variáveis de estado
+        let metodoAtual = null;
+        let passoAtualWizard = null;
+
+        // Event Listeners
+        document.getElementById('btn-guiado').addEventListener('click', () => {
+            modoSelecao.classList.add('hidden');
+            modoGuiado.classList.remove('hidden');
+            iniciarWizard();
+        });
+
+        document.getElementById('btn-direto').addEventListener('click', () => {
+            modoSelecao.classList.add('hidden');
+            modoDireto.classList.remove('hidden');
+        });
+
+        document.getElementById('back-to-mode').addEventListener('click', voltarModoSelecao);
+        document.getElementById('back-to-mode-2').addEventListener('click', voltarModoSelecao);
+        document.getElementById('back-to-method').addEventListener('click', voltarModoMetodo);
+        document.getElementById('back-to-calc').addEventListener('click', voltarCalculo);
+        document.getElementById('new-calculation').addEventListener('click', novaAnalise);
+
+        // Adicionar event listeners para os botões de método no modo direto
+        document.querySelectorAll('.method-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const metodo = btn.getAttribute('data-method');
+                selecionarMetodo(metodo);
+            });
+        });
+
+        // Funções de navegação
+        function voltarModoSelecao() {
+            modoGuiado.classList.add('hidden');
+            modoDireto.classList.add('hidden');
+            calculoArea.classList.add('hidden');
+            resultadoArea.classList.add('hidden');
+            modoSelecao.classList.remove('hidden');
+        }
+
+        function voltarModoMetodo() {
+            calculoArea.classList.add('hidden');
+            resultadoArea.classList.add('hidden');
+            
+            if (metodoAtual && passoAtualWizard) {
+                modoGuiado.classList.remove('hidden');
+            } else {
+                modoDireto.classList.remove('hidden');
+            }
+        }
+
+        function voltarCalculo() {
+            resultadoArea.classList.add('hidden');
+            calculoArea.classList.remove('hidden');
+        }
+
+        function novaAnalise() {
+            resultadoArea.classList.add('hidden');
+            calculoArea.classList.add('hidden');
+            modoSelecao.classList.remove('hidden');
+            metodoAtual = null;
+            passoAtualWizard = null;
+            calculoForm.reset();
+        }
+
+        // Lógica do Wizard
+        function iniciarWizard() {
+            passoAtualWizard = 'inicio';
+            exibirPerguntaWizard(wizardTree);
+        }
+
+        function exibirPerguntaWizard(passo) {
+            wizardPergunta.innerHTML = `<h4>${passo.pergunta}</h4>`;
+            wizardOpcoes.innerHTML = '';
+            
+            passo.opcoes.forEach(opcao => {
+                const btn = document.createElement('button');
+                btn.className = 'wizard-option secondary';
+                btn.textContent = opcao.texto;
+                btn.addEventListener('click', () => {
+                    if (opcao.proximo.startsWith('p')) {
+                        // É uma pergunta intermediária
+                        const proximoPasso = obterProximoPassoWizard(opcao.proximo);
+                        exibirPerguntaWizard(proximoPasso);
+                    } else {
+                        // É um método final
+                        selecionarMetodo(opcao.proximo);
+                    }
+                });
+                wizardOpcoes.appendChild(btn);
+            });
+        }
+
+        function obterProximoPassoWizard(id) {
+            switch(id) {
+                case 'p2': return wizardP2;
+                case 'p3': return wizardP3;
+                case 'p4': return wizardP4;
+                case 'p5': return wizardP5;
+                case 'p6': return wizardP6;
+                default: return wizardTree;
+            }
+        }
+
+        // Lógica de seleção de método
+        function selecionarMetodo(metodo) {
+            metodoAtual = metodo;
+            const metodoInfo = metodos[metodo];
+            
+            // Atualizar informações do método
+            metodoTitulo.textContent = metodoInfo.nome;
+            metodoDescricao.textContent = metodoInfo.descricao;
+            
+            // Gerar inputs dinamicamente
+            inputsContainer.innerHTML = '';
+            metodoInfo.inputs.forEach(input => {
+                const div = document.createElement('div');
+                div.className = 'form-group';
+                
+                const label = document.createElement('label');
+                label.setAttribute('for', input.id);
+                label.textContent = input.label;
+                
+                const inputElement = document.createElement('input');
+                inputElement.setAttribute('type', input.type);
+                inputElement.setAttribute('id', input.id);
+                inputElement.setAttribute('name', input.id);
+                if (input.min !== undefined) inputElement.setAttribute('min', input.min);
+                if (input.placeholder) inputElement.setAttribute('placeholder', input.placeholder);
+                
+                div.appendChild(label);
+                div.appendChild(inputElement);
+                inputsContainer.appendChild(div);
+            });
+            
+            // Mostrar área de cálculo
+            modoGuiado.classList.add('hidden');
+            modoDireto.classList.add('hidden');
+            calculoArea.classList.remove('hidden');
+        }
+
+        // Event listener para o formulário de cálculo
+        calculoForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const dados = {};
+            for (const [key, value] of formData.entries()) {
+                dados[key] = value;
+            }
+            
+            // Calcular resultado
+            const metodoInfo = metodos[metodoAtual];
+            const resultado = metodoInfo.calcular(dados);
+            
+            // Atualizar área de resultado
+            resultadoMetodo.textContent = metodoInfo.nome;
+            resultadoExplicacao.textContent = metodoInfo.explicacao;
+            resultadoFormula.textContent = metodoInfo.formula;
+            resultadoCalculo.textContent = metodoInfo.gerarCalculo(dados, resultado);
+            resultadoFinal.textContent = `Existem ${resultado} maneiras possíveis.`;
+            
+            // Mostrar área de resultado
+            calculoArea.classList.add('hidden');
+            resultadoArea.classList.remove('hidden');
+        });
+    </script>
+</body>
+</html>
